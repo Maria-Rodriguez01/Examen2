@@ -117,4 +117,9 @@ public class PSNUSers {
     outputArea.append("Total Points: " + points + "\n");
     outputArea.append("=========================\n");
 }
+   
+   public boolean userExists(String username) throws IOException {
+    reloadHashTable(); 
+    return users.search(username) != -1L;
+}
 }

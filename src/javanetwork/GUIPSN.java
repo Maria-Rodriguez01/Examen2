@@ -11,18 +11,89 @@ import javax.swing.*;
 
 public class GUIPSN extends JFrame {
 
-    private final PSNUSers psn;
-    private final JTextField usernameField = new JTextField();
-    private final JTextField gameField = new JTextField();
-    private final JTextField trophyField = new JTextField();
-    private final JComboBox<Trophy> trophyTypeCombo = new JComboBox<>(Trophy.values());
-    private final JTextArea outputArea = new JTextArea();
+    private PSNUSers psn;
+    private JTextField usernameField = new JTextField();
+    private JTextField gameField = new JTextField();
+    private JTextField trophyField = new JTextField();
+    private JComboBox<Trophy> trophyTypeCombo = new JComboBox<>(Trophy.values());
+    private JTextArea outputArea = new JTextArea();
 
     public GUIPSN() throws IOException {
-        super("PSN Users Management System");
-        this.psn = new PSNUSers();
-        setupFrame();
-        addComponents();
+        super("PSNetwork");
+        initialize();
+        setupUI();
+    }
+    
+    private void initialize() throws IOException {
+            psn = new PSNUSers();
+       
+    }
+
+    private void setupUI() {
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(800, 600);
+        setLayout(new BorderLayout(10, 10));
+
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JPanel inputPanel = new JPanel();
+        inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.Y_AXIS));
+        JPanel usernamePanel = new JPanel(new BorderLayout(5, 0));
+        usernamePanel.add(new JLabel("Username:"), BorderLayout.WEST);
+        usernameField = new JTextField();
+        usernamePanel.add(usernameField, BorderLayout.CENTER);
+        inputPanel.add(usernamePanel);
+
+        JPanel gamePanel = new JPanel(new BorderLayout(5, 0));
+        gamePanel.add(new JLabel("Game:"), BorderLayout.WEST);
+        gameField = new JTextField();
+        gamePanel.add(gameField, BorderLayout.CENTER);
+        inputPanel.add(gamePanel);
+
+        JPanel trophyPanel = new JPanel(new BorderLayout(5, 0));
+        trophyPanel.add(new JLabel("Trophy Name:"), BorderLayout.WEST);
+        trophyField = new JTextField();
+        trophyPanel.add(trophyField, BorderLayout.CENTER);
+        inputPanel.add(trophyPanel);
+
+        // Trophy type row
+        JPanel typePanel = new JPanel(new BorderLayout(5, 0));
+        typePanel.add(new JLabel("Trophy Type:"), BorderLayout.WEST);
+        trophyTypeCombo = new JComboBox<>(Trophy.values());
+        typePanel.add(trophyTypeCombo, BorderLayout.CENTER);
+        inputPanel.add(typePanel);
+
+        // Button panel
+        JPanel buttonPanel = new JPanel(new GridLayout(1, 4, 5, 5));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+
+        JButton addUserBtn = new JButton("Add User");
+        addUserBtn.addActionListener(e -> addUser());
+        buttonPanel.add(addUserBtn);
+
+        JButton addTrophyBtn = new JButton("Add Trophy");
+        addTrophyBtn.addActionListener(e -> addTrophy());
+        buttonPanel.add(addTrophyBtn);
+
+        JButton deactivateBtn = new JButton("Deactivate User");
+        deactivateBtn.addActionListener(e -> deactivateUser());
+        buttonPanel.add(deactivateBtn);
+
+        JButton infoBtn = new JButton("Show Info");
+        infoBtn.addActionListener(e -> showPlayerInfo());
+        buttonPanel.add(infoBtn);
+
+        inputPanel.add(buttonPanel);
+
+        mainPanel.add(inputPanel, BorderLayout.NORTH);
+
+        outputArea = new JTextArea();
+        outputArea.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(outputArea);
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+
+        add(mainPanel);
     }
 
     private void setupFrame() {
@@ -69,7 +140,6 @@ public class GUIPSN extends JFrame {
         return scrollPane;
     }
 
-
     // Action methods
     private void addUser() {
         String username = usernameField.getText().trim();
@@ -88,25 +158,33 @@ public class GUIPSN extends JFrame {
     }
 
     private void addTrophy() {
-        String username = usernameField.getText().trim();
-        String game = gameField.getText().trim();
-        String trophy = trophyField.getText().trim();
+    String username = usernameField.getText().trim();
+    String game = gameField.getText().trim();
+    String trophy = trophyField.getText().trim();
+    Trophy type = (Trophy) trophyTypeCombo.getSelectedItem();
 
-        if (username.isEmpty() || game.isEmpty() || trophy.isEmpty()) {
-            showError("Please fill all fields");
-            return;
-        }
+    if (username.isEmpty() || game.isEmpty() || trophy.isEmpty()) {
+        showError("Por favor complete todos los campos");
+        return;
+    }
 
-        try {
-            Trophy type = (Trophy) trophyTypeCombo.getSelectedItem();
+    try {
+
+        if (psn.userExists(username)) {
             psn.addTrophyTo(username, game, trophy, type);
-            outputArea.append("Trophy '" + trophy + "' added to user '" + username + "'.\n");
+            outputArea.append("Trofeo '" + trophy + "' agregado a '" + username + "'\n");
             gameField.setText("");
             trophyField.setText("");
-        } catch (IOException e) {
-            showError("Error adding trophy: " + e.getMessage());
+        } else {
+            showError("El usuario '" + username + "' no existe");
         }
+    } catch (IOException e) {
+        // Mensaje de error más descriptivo
+        String errorMsg = "Error al agregar trofeo: ";
+        errorMsg += e.getMessage() != null ? e.getMessage() : "Verifique los datos e intente nuevamente";
+        showError(errorMsg);
     }
+}
 
     private void deactivateUser() {
         String username = usernameField.getText().trim();
