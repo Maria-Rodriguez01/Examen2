@@ -164,7 +164,7 @@ public class GUIPSN extends JFrame {
     Trophy type = (Trophy) trophyTypeCombo.getSelectedItem();
 
     if (username.isEmpty() || game.isEmpty() || trophy.isEmpty()) {
-        showError("Por favor complete todos los campos");
+        showError("Fill all the fields");
         return;
     }
 
@@ -172,16 +172,16 @@ public class GUIPSN extends JFrame {
 
         if (psn.userExists(username)) {
             psn.addTrophyTo(username, game, trophy, type);
-            outputArea.append("Trofeo '" + trophy + "' agregado a '" + username + "'\n");
+            outputArea.append("Trophy '" + trophy + "' added to '" + username + "'\n");
             gameField.setText("");
             trophyField.setText("");
         } else {
-            showError("El usuario '" + username + "' no existe");
+            showError("Usuario '" + username + " doesn't exist");
         }
     } catch (IOException e) {
         // Mensaje de error más descriptivo
-        String errorMsg = "Error al agregar trofeo: ";
-        errorMsg += e.getMessage() != null ? e.getMessage() : "Verifique los datos e intente nuevamente";
+        String errorMsg = "Error adding trophy: ";
+        errorMsg += e.getMessage() != null ? e.getMessage() : "VErify the information provided";
         showError(errorMsg);
     }
 }
