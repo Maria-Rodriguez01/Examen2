@@ -181,7 +181,7 @@ public class GUIPSN extends JFrame {
     } catch (IOException e) {
         // Mensaje de error más descriptivo
         String errorMsg = "Error adding trophy: ";
-        errorMsg += e.getMessage() != null ? e.getMessage() : "VErify the information provided";
+        errorMsg += e.getMessage() != null ? e.getMessage() : "Verify the information provided";
         showError(errorMsg);
     }
 }
@@ -222,13 +222,5 @@ public class GUIPSN extends JFrame {
         JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            try {
-                new GUIPSN().setVisible(true);
-            } catch (IOException ex) {
-                Logger.getLogger(GUIPSN.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        });
-    }
+    
 }

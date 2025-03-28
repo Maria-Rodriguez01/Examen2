@@ -4,6 +4,11 @@
  */
 package javanetwork;
 
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.SwingUtilities;
+
 /**
  *
  * @author Maria Gabriela
@@ -14,8 +19,13 @@ public class JavaNetwork {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-       GUIPSN guipsn= new GUIPSN();
-       guipsn.setVisible(true);
+        SwingUtilities.invokeLater(() -> {
+            try {
+                new GUIPSN().setVisible(true);
+            } catch (IOException ex) {
+                Logger.getLogger(GUIPSN.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
     }
     
 }
