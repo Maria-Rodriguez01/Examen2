@@ -18,5 +18,5 @@ public enum Trophy {
     
     Trophy(int points){
         this.points=points;
-    }
+}
 }

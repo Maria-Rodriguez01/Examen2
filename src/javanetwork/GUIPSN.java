@@ -5,93 +5,72 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.*;
 
 public class GUIPSN extends JFrame {
-    private PSNUsers psn;
-    private JTextField usernameField;
-    private JTextField gameField;
-    private JTextField trophyField;
-    private JComboBox<Trophy> trophyTypeCombo;
-    private JTextArea outputArea;
 
-    public GUIPSN() {
+    private final PSNUSers psn;
+    private final JTextField usernameField = new JTextField();
+    private final JTextField gameField = new JTextField();
+    private final JTextField trophyField = new JTextField();
+    private final JComboBox<Trophy> trophyTypeCombo = new JComboBox<>(Trophy.values());
+    private final JTextArea outputArea = new JTextArea();
+
+    public GUIPSN() throws IOException {
         super("PSN Users Management System");
-        initialize();
-        setupUI();
+        this.psn = new PSNUSers();
+        setupFrame();
+        addComponents();
     }
 
-    private void initialize() {
-        try {
-            psn = new PSNUsers();
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "Error initializing PSN system: " + e.getMessage(),
-                                      "Initialization Error", JOptionPane.ERROR_MESSAGE);
-            System.exit(1);
-        }
-    }
-
-    private void setupUI() {
+    private void setupFrame() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 600);
-        setLayout(new BorderLayout());
-
-        // Input panel
-        JPanel inputPanel = new JPanel(new GridLayout(5, 2, 5, 5));
-        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        inputPanel.add(new JLabel("Username:"));
-        usernameField = new JTextField();
-        inputPanel.add(usernameField);
-
-        inputPanel.add(new JLabel("Game:"));
-        gameField = new JTextField();
-        inputPanel.add(gameField);
-
-        inputPanel.add(new JLabel("Trophy Name:"));
-        trophyField = new JTextField();
-        inputPanel.add(trophyField);
-
-        inputPanel.add(new JLabel("Trophy Type:"));
-        trophyTypeCombo = new JComboBox<>(Trophy.values());
-        inputPanel.add(trophyTypeCombo);
-
-        JButton addUserBtn = new JButton("Add User");
-        addUserBtn.addActionListener(e -> addUser());
-        inputPanel.add(addUserBtn);
-
-        JButton addTrophyBtn = new JButton("Add Trophy");
-        addTrophyBtn.addActionListener(e -> addTrophy());
-        inputPanel.add(addTrophyBtn);
-
-        JButton deactivateBtn = new JButton("Deactivate User");
-        deactivateBtn.addActionListener(e -> deactivateUser());
-        inputPanel.add(deactivateBtn);
-
-        JButton infoBtn = new JButton("Show Info");
-        infoBtn.addActionListener(e -> showPlayerInfo());
-        inputPanel.add(infoBtn);
-
-        add(inputPanel, BorderLayout.NORTH);
-
-        // Output area
-        outputArea = new JTextArea();
-        outputArea.setEditable(false);
-        JScrollPane scrollPane = new JScrollPane(outputArea);
-        add(scrollPane, BorderLayout.CENTER);
-
-        // Menu bar
-        JMenuBar menuBar = new JMenuBar();
-        JMenu fileMenu = new JMenu("File");
-        
-        JMenuItem exitItem = new JMenuItem("Exit");
-        exitItem.addActionListener(e -> System.exit(0));
-        fileMenu.add(exitItem);
-        
-        menuBar.add(fileMenu);
-        setJMenuBar(menuBar);
+        setLayout(new BorderLayout(10, 10));
     }
 
+    private void addComponents() {
+        add(createInputPanel(), BorderLayout.NORTH);
+        add(createOutputPanel(), BorderLayout.CENTER);
+    }
+
+    private JPanel createInputPanel() {
+        JPanel panel = new JPanel(new GridLayout(5, 2, 5, 5));
+
+        addLabelAndField(panel, "Username:", usernameField);
+        addLabelAndField(panel, "Game:", gameField);
+        addLabelAndField(panel, "Trophy Name:", trophyField);
+        addLabelAndField(panel, "Trophy Type:", trophyTypeCombo);
+
+        addButton(panel, "Add User", this::addUser);
+        addButton(panel, "Add Trophy", this::addTrophy);
+        addButton(panel, "Deactivate User", this::deactivateUser);
+        addButton(panel, "Show Info", this::showPlayerInfo);
+
+        return panel;
+    }
+
+    private void addLabelAndField(JPanel panel, String labelText, JComponent field) {
+        panel.add(new JLabel(labelText));
+        panel.add(field);
+    }
+
+    private void addButton(JPanel panel, String text, Runnable action) {
+        JButton button = new JButton(text);
+        button.addActionListener(e -> action.run());
+        panel.add(button);
+    }
+
+    private JScrollPane createOutputPanel() {
+        outputArea.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(outputArea);
+        return scrollPane;
+    }
+
+
+    // Action methods
     private void addUser() {
         String username = usernameField.getText().trim();
         if (username.isEmpty()) {
@@ -102,6 +81,7 @@ public class GUIPSN extends JFrame {
         try {
             psn.addUsers(username);
             outputArea.append("User '" + username + "' added successfully.\n");
+            usernameField.setText("");
         } catch (IOException e) {
             showError("Error adding user: " + e.getMessage());
         }
@@ -111,7 +91,6 @@ public class GUIPSN extends JFrame {
         String username = usernameField.getText().trim();
         String game = gameField.getText().trim();
         String trophy = trophyField.getText().trim();
-        Trophy type = (Trophy) trophyTypeCombo.getSelectedItem();
 
         if (username.isEmpty() || game.isEmpty() || trophy.isEmpty()) {
             showError("Please fill all fields");
@@ -119,8 +98,11 @@ public class GUIPSN extends JFrame {
         }
 
         try {
+            Trophy type = (Trophy) trophyTypeCombo.getSelectedItem();
             psn.addTrophyTo(username, game, trophy, type);
             outputArea.append("Trophy '" + trophy + "' added to user '" + username + "'.\n");
+            gameField.setText("");
+            trophyField.setText("");
         } catch (IOException e) {
             showError("Error adding trophy: " + e.getMessage());
         }
@@ -136,6 +118,7 @@ public class GUIPSN extends JFrame {
         try {
             psn.deactivateUser(username);
             outputArea.append("User '" + username + "' deactivated.\n");
+            usernameField.setText("");
         } catch (IOException e) {
             showError("Error deactivating user: " + e.getMessage());
         }
@@ -149,9 +132,9 @@ public class GUIPSN extends JFrame {
         }
 
         try {
-            outputArea.append("\n=== Player Info for '" + username + "' ===\n");
+            outputArea.append("\n=== Player Info ===\n");
             psn.playerInfo(username, outputArea);
-            outputArea.append("=================================\n");
+            outputArea.append("===================\n");
         } catch (IOException e) {
             showError("Error retrieving player info: " + e.getMessage());
         }
@@ -163,8 +146,11 @@ public class GUIPSN extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            GUIPSN gui = new GUIPSN();
-            gui.setVisible(true);
+            try {
+                new GUIPSN().setVisible(true);
+            } catch (IOException ex) {
+                Logger.getLogger(GUIPSN.class.getName()).log(Level.SEVERE, null, ex);
+            }
         });
     }
 }

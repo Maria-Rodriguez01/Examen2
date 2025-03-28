@@ -14,12 +14,12 @@ import javax.swing.JTextArea;
  *
  * @author Maria Gabriela
  */
-public class PSNUsers {
+public class PSNUSers {
 
     RandomAccessFile psn;
     HashTable users;
 
-    public PSNUsers() throws IOException {
+    public PSNUSers() throws IOException {
         this.psn = new RandomAccessFile("usuarios.psn", "rw");
         this.users = new HashTable();
         reloadHashTable();
